@@ -1,3 +1,4 @@
+import { isWeb } from "./transport";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useStore, type Page, type Tab } from "./store";
 import { isMobile, selfTest } from "./api";
@@ -195,7 +196,7 @@ function DesktopShell() {
         <ShellInner collapsed={collapsed || theater} theater={theater} />
       </div>
       {/* 边缘缩放热区只对无边框窗口（Windows / Linux）有效，macOS 走原生窗口边框 */}
-      {(platform === "windows" || platform === "linux") && <ResizeHandles />}
+      {!isWeb && (platform === "windows" || platform === "linux") && <ResizeHandles />}
     </div>
   );
 }
@@ -277,7 +278,7 @@ export default function App() {
      原生层已默认关闭文本交互（isTextInteractionEnabled=false）；这里在用户触碰输入框时
      重新打开、失焦时再关闭，避免影响搜索/评论/登录等文本输入。 */
   useEffect(() => {
-    if (platform !== "ios") return;
+    if (isWeb || platform !== "ios") return;
     const setTI = (enabled: boolean) => setTextInteraction(enabled).catch(() => {});
     const INPUTS = 'input, textarea, [contenteditable="true"]';
     const onDown = (e: Event) => {
@@ -313,7 +314,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (platform !== "android") return undefined;
+    if (isWeb || platform !== "android") return undefined;
     let disposed = false;
     let handle: { unregister: () => Promise<void> } | null = null;
     addPluginListener("app", "back-button", () => backRef.current())

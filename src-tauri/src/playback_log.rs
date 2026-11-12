@@ -204,12 +204,12 @@ pub fn record(event: &str, data: Value) {
     }
 }
 
-#[tauri::command]
+#[cfg_attr(feature = "desktop", tauri::command)]
 pub fn playback_log_status() -> Result<Status, String> {
     Ok(LOG.lock().map_err(|_| "日志锁失败")?.status())
 }
 
-#[tauri::command]
+#[cfg_attr(feature = "desktop", tauri::command)]
 pub fn playback_log_set(enabled: bool) -> Result<Status, String> {
     let mut log = LOG.lock().map_err(|_| "日志锁失败")?;
     let result = log.set(enabled);
@@ -218,7 +218,7 @@ pub fn playback_log_set(enabled: bool) -> Result<Status, String> {
     Ok(log.status())
 }
 
-#[tauri::command]
+#[cfg_attr(feature = "desktop", tauri::command)]
 pub fn playback_log_write(entries: Vec<Entry>) -> Result<(), String> {
     if !enabled() {
         return Ok(());
@@ -245,7 +245,7 @@ pub fn playback_log_write(entries: Vec<Entry>) -> Result<(), String> {
     Ok(())
 }
 
-#[tauri::command]
+#[cfg_attr(feature = "desktop", tauri::command)]
 pub fn playback_log_read() -> Result<String, String> {
     let log = LOG.lock().map_err(|_| "日志锁失败")?;
     let dir = log.dir.as_ref().ok_or("日志目录尚未初始化")?;

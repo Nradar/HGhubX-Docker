@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { APP_NAME, APP_DESC } from "../branding";
 import { useStore } from "../store";
 import { ILink, Logo } from "../icons";
+import { isWeb } from "../transport";
 
 /** 门牌页：未激活时只显示输入框，不做任何业务请求；任意非空字符串都交给 gate_open。 */
 export default function SourceGate() {
@@ -36,7 +37,7 @@ export default function SourceGate() {
 
         <div className="text-[17px] font-semibold">接入地址</div>
         <div className="text-[12px] text-mut mt-1.5 leading-relaxed">
-          输入地址后即可开始使用。地址只保存在本机，可随时在设置中更换。
+          输入地址后即可开始使用。{isWeb ? "地址保存在部署主机上" : "地址只保存在本机"}，可随时在设置中更换。
         </div>
 
         <form onSubmit={submit} className="mt-5">
@@ -66,7 +67,7 @@ export default function SourceGate() {
         </form>
 
         <div className="text-[10.5px] text-dim mt-6 leading-relaxed">
-          不校验地址格式，也不探测服务器；输入什么就连接什么。
+          {isWeb ? "请输入可公开访问的 HTTP 或 HTTPS 地址。" : "不校验地址格式，也不探测服务器；输入什么就连接什么。"}
         </div>
       </div>
     </div>

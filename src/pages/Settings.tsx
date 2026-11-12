@@ -1,3 +1,4 @@
+import { isWeb } from "../transport";
 import { useEffect, useState, type ReactNode } from "react";
 import { api, APP_VERSION, hostOf, logLine, platform } from "../api";
 import type { UpdateInfo } from "../types";
@@ -160,14 +161,14 @@ export default function Settings({ onBack, wide }: { onBack: () => void; wide: b
               <div className="flex-1 min-w-0">
                 <div className="text-[12.5px] text-on">严格安全模式</div>
                 <div className="text-[10.5px] text-mut">
-                  {cliRelaxed
+                  {isWeb ? "Web 部署固定开启严格安全模式" : cliRelaxed
                     ? "已由启动参数 --no-strict 切换为兼容模式；可手动重新开启"
                     : "默认开启，防上游投毒与内网探测；若导致正文或特殊代理异常可关闭（或用 --no-strict 启动）"}
                 </div>
               </div>
               <Toggle
                 on={strictSecurity}
-                disabled={!strictSecurityReady || securityPending}
+                disabled={isWeb || !strictSecurityReady || securityPending}
                 onChange={(on) => {
                   void setStrictSecurity(on).then(() => {
                     toast(on ? "已开启严格安全模式" : "已切换为兼容模式（关闭激进清洗与守卫）", "info");
@@ -243,14 +244,14 @@ export default function Settings({ onBack, wide }: { onBack: () => void; wide: b
           </Section>
 
           <Section title="其他">
-            <button onClick={checkUpdate} disabled={checking} className="w-full flex items-center gap-3 px-3.5 py-3 text-left pressable disabled:opacity-60">
+            {!isWeb && <button onClick={checkUpdate} disabled={checking} className="w-full flex items-center gap-3 px-3.5 py-3 text-left pressable disabled:opacity-60">
               <span className="w-8 h-8 rounded-full bg-s3 flex items-center justify-center text-primary"><IRefresh size={16} /></span>
               <div className="flex-1">
                 <div className="text-[12.5px] text-on">检查更新</div>
                 <div className="text-[10.5px] text-mut">{checking ? "检查中…" : `当前 v${APP_VERSION} · 对比 GitHub Release`}</div>
               </div>
               <IChevR size={15} className="text-mut" />
-            </button>
+            </button>}
             <button onClick={() => setAbout(true)} className="w-full flex items-center gap-3 px-3.5 py-3 text-left pressable">
               <span className="w-8 h-8 rounded-full bg-s3 flex items-center justify-center text-primary"><IInfo size={16} /></span>
               <div className="flex-1">
@@ -261,7 +262,7 @@ export default function Settings({ onBack, wide }: { onBack: () => void; wide: b
             </button>
           </Section>
 
-          <div className="text-center text-[10px] text-dim mt-5">{APP_NAME} {APP_VERSION} · {platform === "android" ? "Android" : platform === "ios" ? "iOS" : platform === "macos" ? "macOS" : platform === "linux" ? "Linux" : "Windows"} 客户端</div>
+          <div className="text-center text-[10px] text-dim mt-5">{APP_NAME} {APP_VERSION} · {isWeb ? "Web" : platform === "android" ? "Android" : platform === "ios" ? "iOS" : platform === "macos" ? "macOS" : platform === "linux" ? "Linux" : "Windows"} 客户端</div>
         </div>
       </div>
 

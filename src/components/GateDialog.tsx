@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useStore } from "../store";
 import { Modal } from "./ui";
 import { ILink } from "../icons";
+import { isWeb } from "../transport";
 
 /** 设置里的接入地址弹窗：与首屏 SourceGate 共用同一套零校验 gate_open。 */
 export default function GateDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -24,7 +25,7 @@ export default function GateDialog({ open, onClose }: { open: boolean; onClose: 
           <span className="w-8 h-8 rounded-full bg-s3 flex items-center justify-center text-primary"><ILink size={16} /></span>
           <div>
             <div className="text-[14px] font-bold text-on">接入地址</div>
-            <div className="text-[10.5px] text-mut mt-0.5">地址只保存在本机，不校验格式</div>
+            <div className="text-[10.5px] text-mut mt-0.5">{isWeb ? "地址保存在部署主机上" : "地址只保存在本机，不校验格式"}</div>
           </div>
         </div>
         <div className={`mt-4 flex items-center gap-2 h-11 rounded-(--r-md) bg-s3 border px-3 ${gateError ? "border-danger/60" : "border-s4/60"}`}>

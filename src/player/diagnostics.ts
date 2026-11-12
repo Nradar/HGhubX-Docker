@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { isWeb, shellCall } from "../transport";
 import {
   useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore,
   type ChangeEvent, type PointerEvent, type RefObject,
@@ -17,10 +17,10 @@ type Snapshot = Status & { ready: boolean; pending: boolean };
 
 // Separate transport also lets browser regressions verify diagnostics without Tauri or upstream.
 export const playbackLogApi = {
-  status: () => invoke<Status>("playback_log_status"),
-  set: (enabled: boolean) => invoke<Status>("playback_log_set", { enabled }),
-  write: (entries: Entry[]) => invoke<void>("playback_log_write", { entries }),
-  read: () => invoke<string>("playback_log_read"),
+  status: () => shellCall<Status>("playback_log_status"),
+  set: (enabled: boolean) => shellCall<Status>("playback_log_set", { enabled }),
+  write: (entries: Entry[]) => shellCall<void>("playback_log_write", { entries }),
+  read: () => shellCall<string>("playback_log_read"),
 };
 let state: Snapshot = { enabled: false, path: null, error: null, ready: false, pending: false };
 const listeners = new Set<() => void>();
@@ -88,8 +88,8 @@ export async function copyPlaybackLog() {
 
 export function mediaResource(raw: string) {
   try {
-    const url = new URL(raw);
-    if (url.protocol === "hg:" || url.hostname === "hg.localhost") raw = url.searchParams.get("u") || raw;
+    const url = new URL(raw, isWeb ? location.origin : undefined);
+    if (url.protocol === "hg:" || url.hostname === "hg.localhost" || (isWeb && url.origin === location.origin && url.pathname.startsWith("/media/"))) raw = url.searchParams.get("u") || raw;
   } catch { /* still fingerprint invalid targets without logging their contents */ }
   let hash = 2166136261;
   for (const b of new TextEncoder().encode(raw)) hash = Math.imul(hash ^ b, 16777619) >>> 0;
@@ -102,8 +102,8 @@ export function mediaResource(raw: string) {
  */
 export function mediaHost(raw: string): string {
   try {
-    const url = new URL(raw);
-    if (url.protocol === "hg:" || url.hostname === "hg.localhost") {
+    const url = new URL(raw, isWeb ? location.origin : undefined);
+    if (url.protocol === "hg:" || url.hostname === "hg.localhost" || (isWeb && url.origin === location.origin && url.pathname.startsWith("/media/"))) {
       const inner = url.searchParams.get("u");
       if (inner) return new URL(inner).host;
     }
@@ -249,6 +249,7 @@ export function installPlaybackPageEvents() {
 /* ── 媒体错误提示 ───────────────────────────────────────── */
 
 const isLinuxClient = () => {
+  if (isWeb) return false;
   const ua = navigator.userAgent;
   const android = /Android/i.test(ua);
   const ios = /iPhone|iPad|iPod/i.test(ua) ||

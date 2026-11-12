@@ -5,25 +5,43 @@ description = "HGhubX client"
 authors = ["HGhubX"]
 license = "PolyForm-Noncommercial-1.0.0"
 edition = "2021"
+default-run = "hghubx"
 rust-version = "1.90"
+
+[[bin]]
+name = "hghubx"
+path = "src/main.rs"
+required-features = ["desktop"]
+
+[[bin]]
+name = "hghubx-web"
+path = "src/web_main.rs"
+required-features = ["web"]
 
 [lib]
 name = "hghubx_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [features]
-default = []
+default = ["desktop"]
+desktop = ["dep:tauri", "dep:tauri-build", "dep:tauri-plugin-opener", "dep:tauri-plugin-clipboard-manager", "dep:objc2", "dep:objc2-app-kit", "dep:objc2-foundation", "dep:objc2-ui-kit", "dep:objc2-web-kit"]
+web = ["dep:hyper", "dep:hyper-util", "dep:http-body-util", "dep:subtle", "tokio/fs"]
 # Tauri 2 打 iOS/桌面包时会把 custom-protocol 传给我们这个 crate；
 # 少了它 `tauri ios build` 直接报 “does not contain this feature”。
 custom-protocol = ["tauri/custom-protocol"]
 
 [build-dependencies]
-tauri-build = { version = "2", features = [] }
+tauri-build = { version = "2", features = [], optional = true }
 
 [dependencies]
-tauri = { version = "2", features = [] }
-tauri-plugin-opener = "=2.7.2"
-tauri-plugin-clipboard-manager = "=2.5.0"
+tauri = { version = "2", features = [], optional = true }
+tauri-plugin-opener = { version = "=2.7.2", optional = true }
+tauri-plugin-clipboard-manager = { version = "=2.5.0", optional = true }
+http = "1"
+hyper = { version = "1", features = ["http1", "server"], optional = true }
+hyper-util = { version = "0.1", features = ["tokio"], optional = true }
+http-body-util = { version = "0.1", optional = true }
+subtle = { version = "2", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 time = { version = "0.3", features = ["formatting"] }
@@ -48,8 +66,8 @@ url = "2"
 # macOS 红绿灯垂直居中需要读取 AppKit 按钮尺寸（见 src/macos_titlebar.rs）。
 # 三者均已是 tao/wry 的间接依赖，版本与 Cargo.lock 一致；只开启用到的 feature。
 [target.'cfg(target_os = "macos")'.dependencies]
-objc2 = "0.6"
-objc2-app-kit = { version = "0.3", default-features = false, features = [
+objc2 = { version = "0.6", optional = true }
+objc2-app-kit = { version = "0.3", optional = true, default-features = false, features = [
   "std",
   "NSButton",
   "NSControl",
@@ -58,11 +76,11 @@ objc2-app-kit = { version = "0.3", default-features = false, features = [
   "NSView",
   "NSWindow",
 ] }
-objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSGeometry"] }
+objc2-foundation = { version = "0.3", optional = true, default-features = false, features = ["std", "NSGeometry"] }
 
 [target.'cfg(target_os = "ios")'.dependencies]
-objc2 = "0.6"
-objc2-ui-kit = { version = "0.3", default-features = false, features = [
+objc2 = { version = "0.6", optional = true }
+objc2-ui-kit = { version = "0.3", optional = true, default-features = false, features = [
   "std",
   "objc2-core-foundation",
   "UIResponder",
@@ -71,7 +89,7 @@ objc2-ui-kit = { version = "0.3", default-features = false, features = [
   "UIWindow",
   "UIGeometry",
 ] }
-objc2-web-kit = { version = "0.3", default-features = false, features = [
+objc2-web-kit = { version = "0.3", optional = true, default-features = false, features = [
   "std",
   "WKWebViewConfiguration",
   "WKPreferences",

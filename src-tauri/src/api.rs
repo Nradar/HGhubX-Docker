@@ -1,22 +1,12 @@
 //! 业务命令：登录 / 列表 / 详情 / 播放 / 互动。
 
 use crate::net::{base, edge};
-use crate::session::SessionStore;
+pub(crate) use crate::api_state::Api;
 use serde_json::{json, Value};
 use tauri::State;
 use tauri_plugin_opener::OpenerExt;
 
-pub struct Api {
-    pub session: SessionStore,
-}
-
 impl Api {
-    pub fn new() -> Self {
-        Self {
-            session: SessionStore::new(),
-        }
-    }
-
     /// POST 信封：新播放接口 /api/videos/{id}/episodes/{ep}/playback 需要。
     async fn post(&self, path: &str, body: Option<Value>) -> Result<Value, String> {
         let origin = base();

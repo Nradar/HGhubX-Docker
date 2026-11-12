@@ -1,7 +1,7 @@
 //! 账号与用户资料服务。
 
 use crate::adapters::edge_v1::EdgeV1Adapter;
-use crate::api::Api;
+use crate::api_state::Api;
 use crate::infra::source;
 use crate::services::{adapter, to_json};
 use serde_json::{json, Value};

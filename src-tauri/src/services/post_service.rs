@@ -1,6 +1,6 @@
 //! 图文 / 帖子服务。
 
-use crate::api::Api;
+use crate::api_state::Api;
 use crate::services::{adapter, to_json};
 use serde_json::Value;
 

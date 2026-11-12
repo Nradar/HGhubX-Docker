@@ -31,6 +31,61 @@ Windows / macOS / Android 三端 · Fluent 设计 · 沉浸式竖屏播放
 > 包括打包出售、接入付费/会员/广告变现、作为收费产品或服务的一部分分发。
 > 个人学习、研究、自用与非营利使用不受限制，详见 [LICENSE](LICENSE)。
 
+## Docker Web 版
+
+在部署主机上克隆仓库，然后在仓库根目录创建 `.env`。把示例值替换成独立的随机密码（至少 16 个可打印 ASCII 字符，不含空格）。可选的 `HGHUBX_WEB_PORT` 用于更改宿主机端口。
+
+```dotenv
+HGHUBX_WEB_PASSWORD='replace-with-a-random-password'
+HGHUBX_WEB_PORT=8080
+```
+
+```sh
+docker compose up -d --build
+docker compose ps
+```
+
+在部署主机打开 [http://127.0.0.1:8080](http://127.0.0.1:8080)，在浏览器登录提示里输入用户名 `admin` 和上面设置的密码。首次进入后，在页面里填写自己的上游接入地址。
+
+**远程访问。** Compose 默认只在部署主机的回环地址监听。如果主机已启用 SSH，可以在自己的电脑运行下面的命令，然后用本机浏览器打开同一个地址。将 `user@server` 替换为你的 SSH 用户和主机地址。
+
+```sh
+ssh -N -L 127.0.0.1:8080:127.0.0.1:8080 user@server
+```
+
+如果主机和手机已加入同一个 Tailscale 网络，在部署主机运行 `tailscale serve --bg 8080`，再从手机打开命令输出的 HTTPS 地址。[Tailscale 的 Docker 部署示例](https://tailscale.com/docs/solutions/host-private-server-docker)
+
+已有 HTTPS 反向代理也可以转发到部署主机的 `127.0.0.1:8080`。代理须保留请求的 `Authorization` 头，并将整个站点挂在域名根路径。请使用私有入口，并通过 HTTPS 或 SSH 隧道传输浏览器登录凭据。
+
+这是单用户部署。所有通过入口认证的设备共享接入地址和上游登录状态，这些数据保存在 `hghubx-data` Docker 卷里。收藏、观看历史和界面偏好保存在各自的浏览器。更新代码后再次运行 `docker compose up -d --build` 即可。
+
+### 从 Unraid 拉取镜像
+
+`main` 分支推送后，GitHub Actions 会构建和验证 Linux x86-64 镜像，再发布到 GHCR。
+
+```sh
+docker pull ghcr.io/nradar/hghubx-docker:latest
+```
+
+在 Unraid 终端创建持久化目录，让容器用户可以写入：
+
+```sh
+install -d -o 10001 -g 10001 -m 0700 /mnt/user/appdata/hghubx/state
+```
+
+在 **Docker → Add Container** 中填写以下配置。
+
+| 项目 | 值 |
+| --- | --- |
+| Name | `hghubx` |
+| Repository | `ghcr.io/nradar/hghubx-docker:latest` |
+| Network Type | `Bridge` |
+| TCP Port | 宿主机 `18080` → 容器 `8080` |
+| Path | `/mnt/user/appdata/hghubx/state` → `/data/state`，读写 |
+| Variable | `HGHUBX_WEB_PASSWORD`，填入至少 16 位的独立随机密码 |
+
+在局域网打开 `http://<Unraid-IP>:18080`，以 `admin` 登录。跨网络访问时使用私有 HTTPS 入口。
+
 ## 仿冒提醒
 
 > 🚫 **已发现的恶意修改版**：[`hichuv/HGhub`](https://github.com/hichuv/HGhub)

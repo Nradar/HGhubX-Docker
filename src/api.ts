@@ -1,6 +1,7 @@
 import { tracePlayback } from "./player/diagnostics";
 import { dataCall, type DataCommand } from "./data/client";
 import { commands } from "./data/commands";
+import { isWeb } from "./transport";
 import {
   checkUpdate, clearCache, gateOpen, gateReset, gateState, logLine, netDiag, openUrl, securitySet,
   setOrientation,
@@ -44,7 +45,7 @@ export const isMobile = isAndroid || isIos;
  *          它拿不到自定义 scheme，所以由 Rust 侧在 loopback 上起 HTTP 代理
  *          （`src-tauri/src/linux_http.rs`，端口必须与此一致）。 */
 export const LOCAL =
-  isMacos || isIos ? "hg://localhost" : isLinux ? "http://127.0.0.1:17650" : "http://hg.localhost";
+  isWeb ? "/media" : isMacos || isIos ? "hg://localhost" : isLinux ? "http://127.0.0.1:17650" : "http://hg.localhost";
 
 /** src 是否已是本地协议地址（避免在详情页把代理地址再包一层） */
 export const isLocalMedia = (src: string) => src.startsWith(`${LOCAL}/`);

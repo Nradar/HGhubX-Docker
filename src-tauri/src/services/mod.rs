@@ -6,7 +6,7 @@ mod playback_service;
 mod post_service;
 
 use crate::adapters::edge_v1::EdgeV1Adapter;
-use crate::api::Api;
+use crate::api_state::Api;
 use crate::domain::DomainCommand;
 use crate::infra::source;
 use serde_json::Value;

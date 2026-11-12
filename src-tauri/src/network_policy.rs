@@ -48,7 +48,7 @@ static SECURITY_FILE: Lazy<RwLock<Option<PathBuf>>> = Lazy::new(|| RwLock::new(N
 
 /// 当前是否启用严格安全模式（默认开启）。
 pub fn strict_security() -> bool {
-    STRICT.load(Ordering::Relaxed)
+    cfg!(all(feature = "web", not(feature = "desktop"))) || STRICT.load(Ordering::Relaxed)
 }
 
 /// 启动时读取落盘的安全模式设置；若命令行显式指定了 `--no-strict` 等参数，则以命令行参数为准。

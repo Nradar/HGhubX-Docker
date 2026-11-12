@@ -1,6 +1,6 @@
 //! 视频详情 / 播放 / 评论 / 互动服务。
 
-use crate::api::Api;
+use crate::api_state::Api;
 use crate::services::{adapter, to_json};
 use serde_json::Value;
 

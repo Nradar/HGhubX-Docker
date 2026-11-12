@@ -1,14 +1,17 @@
 mod adapters;
+#[cfg(feature = "desktop")]
 mod api;
+mod api_state;
+#[cfg(feature = "desktop")]
 mod commands;
 mod domain;
-#[cfg(target_os = "ios")]
+#[cfg(all(feature = "desktop", target_os = "ios"))]
 mod ios_layout;
 mod infra;
-#[cfg(target_os = "linux")]
+#[cfg(all(feature = "desktop", target_os = "linux"))]
 mod linux_http;
 mod logging;
-#[cfg(target_os = "macos")]
+#[cfg(all(feature = "desktop", target_os = "macos"))]
 mod macos_titlebar;
 mod media;
 mod media_dns;
@@ -18,10 +21,15 @@ mod playback_log;
 mod ports;
 mod services;
 mod session;
+#[cfg(feature = "web")]
+pub mod web;
 
+#[cfg(feature = "desktop")]
 use api::Api;
+#[cfg(feature = "desktop")]
 use tauri::Manager;
 
+#[cfg(feature = "desktop")]
 fn allowed_dev_host(host: &str) -> bool {
     if matches!(host, "localhost" | "127.0.0.1" | "::1" | "[::1]") {
         return true;
@@ -36,6 +44,7 @@ fn allowed_dev_host(host: &str) -> bool {
         .is_some_and(|v| host.eq_ignore_ascii_case(v.trim()))
 }
 
+#[cfg(feature = "desktop")]
 fn allowed_frontend_origin(origin: &str) -> bool {
     if matches!(
         origin,
@@ -53,6 +62,7 @@ fn allowed_frontend_origin(origin: &str) -> bool {
         })
 }
 
+#[cfg(feature = "desktop")]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
