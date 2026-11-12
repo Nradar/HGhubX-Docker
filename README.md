@@ -63,6 +63,14 @@ ssh -N -L 127.0.0.1:8080:127.0.0.1:8080 user@server
 
 `main` 分支推送后，GitHub Actions 会构建和验证 Linux x86-64 镜像，再发布到 GHCR。
 
+GHCR 首次发布的包默认为私有。若包仍为私有，先用具有 `read:packages` 权限的 GitHub classic PAT 在 Unraid 终端登录 `ghcr.io`。公开包可以直接拉取。[GHCR 登录与权限说明](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
+
+```sh
+docker login ghcr.io -u Nradar
+```
+
+在密码提示处输入 PAT，然后拉取镜像。
+
 ```sh
 docker pull ghcr.io/nradar/hghubx-docker:latest
 ```

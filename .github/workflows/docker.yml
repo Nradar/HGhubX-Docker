@@ -55,7 +55,7 @@ jobs:
             --env "HGHUBX_WEB_PASSWORD=$password" "$IMAGE")"
           trap 'docker logs "$container"; docker rm -fv "$container"' EXIT
           url="http://$(docker port "$container" 8080/tcp)"
-          curl --fail --silent --show-error --retry 20 --retry-connrefused --retry-delay 1 "$url/healthz"
+          curl --fail --silent --show-error --max-time 3 --retry 20 --retry-all-errors --retry-delay 1 "$url/healthz"
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' "$url/")" = 401
           curl --fail --silent --show-error --user "admin:$password" "$url/" | grep -q '<title>HGhubX</title>'
           docker exec "$container" test -w /data/state
